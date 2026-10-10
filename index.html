@@ -246,8 +246,9 @@
     <!-- SECTION PORTOFOLIO -->
     <div id="portofolio" class="content-section">
         <h1 style="margin-bottom: 5px; margin-top: 20px;">KESIMPULAN PORTOFOLIO</h1>
-        <p style="color: #aaa; margin-bottom: 20px;">Pelacakan otomatis dari jaringan Web3</p>
-              <!-- TOMBOL KONEKSI WEB3 WALLET -->
+        <p style="color: #aaa; margin-bottom: 20px;">Kombinasi Aset On-Chain (Web3) & CEX</p>
+        
+        <!-- TOMBOL KONEKSI WEB3 WALLET -->
         <div class="calc-card" style="padding: 20px; margin-bottom: 20px; min-height: auto; text-align: center; border-color: #04AA6D; background: rgba(4, 170, 109, 0.05);">
             <h3 style="color: #00ff88; margin-bottom: 10px; border: none;">🔗 Web3 Wallet Connection</h3>
             <p style="color: #aaa; font-size: 0.85em; margin-bottom: 15px;">Hubungkan dompet Anda untuk menarik saldo otomatis secara instan.</p>
@@ -256,22 +257,12 @@
             </button>
             <p id="wallet-connected-address" style="font-size: 0.8em; color: #00ff88; margin-top: 10px; word-break: break-all;"></p>
         </div>
-        
+
         <div class="calc-card" style="padding: 15px; margin-bottom: 20px; min-height: auto; border-color: #0088ff;">
             <label style="font-size: 0.85em; color: #aaa; margin-bottom: 8px; display: block;">🔍 Cek Dompet Lain (Watch Mode):</label>
             <div style="display: flex; gap: 10px;">
-                <input type="text" id="search-wallet" placeholder="Masukkan Address EVM (0x...) atau Solana" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.5); color: white; outline: none; font-size:0.9em;">
+                <input type="text" id="search-wallet" placeholder="Masukkan Address EVM (0x...)" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.5); color: white; outline: none; font-size:0.9em;">
                 <button class="btn-calc" style="width: auto; padding: 0 20px; background: linear-gradient(135deg, #0088ff, #0055aa);" onclick="loadAllBalances()">Cari</button>
-            </div>
-            <p id="wallet-status-msg" style="font-size: 0.7em; color: #777; margin-top: 8px;">*Kosongkan kolom lalu klik Cari untuk kembali ke dompet utama.</p>
-        </div>
-
-        <div class="calc-card" style="padding: 15px; margin-bottom: 20px; min-height: auto; flex-direction: row; justify-content: space-between; align-items: center; border-color: #f3ba2f;">
-            <span style="font-size: 0.8em; color: #aaa; text-transform: uppercase;">⛽ Live Gas Fee (Gwei):</span>
-            <div style="font-size: 0.85em; font-weight: bold;">
-                <span style="color:#627eea; margin-left:10px;">ETH: <span id="gas-eth">--</span></span>
-                <span style="color:#f3ba2f; margin-left:10px;">BSC: <span id="gas-bsc">--</span></span>
-                <span style="color:#8247e5; margin-left:10px;">POL: <span id="gas-pol">--</span></span>
             </div>
         </div>
 
@@ -280,36 +271,30 @@
             <h2 id="total-usd" style="font-size: 3em; color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.5); margin: 10px 0;">$0.00</h2>
             <h3 id="total-idr" style="font-size: 1.6em; color: #f3ba2f; margin-bottom: 15px;">Rp 0</h3>
             
-            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; display: inline-block;">
+            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; display: inline-block; margin-bottom: 15px;">
                 <label style="font-size: 0.85em; color: #aaa; margin-right: 10px;">⚙️ Kurs USD/IDR:</label>
                 <input type="number" id="custom-idr-rate" style="background: transparent; border: 1px solid #555; color: #00ff88; font-weight: bold; padding: 6px 10px; border-radius: 6px; width: 110px; text-align: center;" oninput="updateIdrTotal()">
             </div>
+
+            <!-- INPUT MANUAL FUTURES -->
+            <div style="background: rgba(243, 186, 47, 0.1); padding: 12px; border-radius: 8px; border: 1px solid #f3ba2f; max-width: 300px; margin: 0 auto;">
+                <label style="font-size: 0.85em; color: #f3ba2f; display: block; margin-bottom: 8px;">📊 Saldo Futures (USDT):</label>
+                <input type="number" id="manual-futures" placeholder="Contoh: 80.5" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; font-weight: bold; padding: 8px; border-radius: 6px; width: 100%; text-align: center;" oninput="updateIdrTotal()">
+                <p style="font-size: 0.65em; color: #aaa; margin-top: 8px;">*Isi manual. Data CEX tertutup dan tidak bisa ditarik tanpa API Key.</p>
+            </div>
             
-            <button class="btn-calc" style="margin-top: 20px; width: auto; padding: 10px 30px;" onclick="loadAllBalances()">🔄 Muat Ulang / Refresh Saldo</button>
+            <button class="btn-calc" style="margin-top: 20px; width: auto; padding: 10px 30px;" onclick="loadAllBalances()">🔄 Muat Ulang Saldo On-Chain</button>
         </div>
 
         <div class="calc-grid" style="margin-top: 20px;">
-            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #f3ba2f; border-color: rgba(243, 186, 47, 0.3);">🟡 BNB Chain (BSC)</h3>
-                <div class="asset-row"><span class="label">BNB:</span> <span id="bnb-bnb" class="value">Menghitung...</span></div>
-                <div class="asset-row"><span class="label">USDT:</span> <span id="bnb-usdt" class="value">Menghitung...</span></div>
-                <div class="asset-row"><span class="label">BTCB:</span> <span id="bnb-btcb" class="value">Menghitung...</span></div>
-                <div class="asset-row"><span class="label">XAUt:</span> <span id="bnb-xaut" class="value">Menghitung...</span></div>
-            </div>
-            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #627eea; border-color: rgba(98, 126, 234, 0.3);">🟣 Ethereum Chain</h3>
-                <div class="asset-row"><span class="label">ETH:</span> <span id="eth-eth" class="value">Menghitung...</span></div>
-                <div class="asset-row"><span class="label">USDT:</span> <span id="eth-usdt" class="value">Menghitung...</span></div>
-            </div>
-            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #14f195; border-color: rgba(20, 241, 149, 0.3);">🟢 Solana Chain</h3>
-                <div class="asset-row"><span class="label">SOL:</span> <span id="sol-sol" class="value">Menghitung...</span></div>
-                <div class="asset-row"><span class="label">USDT:</span> <span id="sol-usdt" class="value">Menghitung...</span></div>
-            </div>
             <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #8247e5; border-color: rgba(130, 71, 229, 0.3);">🔵 Polygon Chain</h3>
                 <div class="asset-row"><span class="label">POL:</span> <span id="pol-matic" class="value">Menghitung...</span></div>
-                <div class="asset-row"><span class="label">USDT:</span> <span id="pol-usdt" class="value">Menghitung...</span></div>
+            </div>
+            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #f3ba2f; border-color: rgba(243, 186, 47, 0.3);">🟡 BNB Chain (BSC)</h3>
+                <div class="asset-row"><span class="label">USDT:</span> <span id="bnb-usdt" class="value">Menghitung...</span></div>
             </div>
             <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #28a0f0; border-color: rgba(40, 160, 240, 0.3);">🔷 Arbitrum Chain</h3>
                 <div class="asset-row"><span class="label">ETH:</span> <span id="arb-eth" class="value">Menghitung...</span></div>
-                <div class="asset-row"><span class="label">USDT:</span> <span id="arb-usdt" class="value">Menghitung...</span></div>
             </div>
         </div>
     </div>
@@ -366,7 +351,6 @@
                 <p style="font-size: 0.7em; color: #777; margin-top: 15px; text-align: left; line-height: 1.4;">*Catatan: XAU (Emas) tidak memiliki Liquidation Map on-chain seperti Kripto. Sebagai gantinya, gunakan data Order Book untuk melihat penumpukan posisi trader Forex.</p>
             </div>
             
-            <!-- TELEGRAM CHANNELS -->
             <div class="calc-card col-span-full" style="padding: 25px; text-align: center; justify-content: center;">
                 <h3 style="margin-bottom: 15px;">✈️ Telegram Makro & Sentimen</h3>
                 <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">Akses cepat ke channel analisis dan berita global:</p>
@@ -421,7 +405,7 @@
     <script>
         // @ts-nocheck
         
-        // 0. LOGIKA PEMUTAR MUSIK DENGAN GAMBAR CUSTOM HU TAO
+        // 0. LOGIKA PEMUTAR MUSIK
         function toggleMusic() {
             const audio = document.getElementById('bg-music');
             const btn = document.getElementById('music-toggle');
@@ -450,7 +434,7 @@
         }
         list.forEach((item) => item.addEventListener('click', activeLink));
 
-        // 2. CHART TRADINGVIEW (Dengan Fitur Pencarian & 2 Chart)
+        // 2. CHART TRADINGVIEW
         function loadChart(symbol) {
             document.getElementById("tradingview_widget").innerHTML = ""; 
             new TradingView.widget({ "width": "100%", "height": 450, "symbol": symbol, "interval": "15", "timezone": "Asia/Jakarta", "theme": "dark", "style": "1", "locale": "id", "enable_publishing": false, "allow_symbol_change": true, "container_id": "tradingview_widget" });
@@ -467,9 +451,8 @@
         loadChart('BINANCE:BTCUSDT'); 
         loadChart2('BINANCE:SUIUSDT'); 
 
-        // 3. KALKULATOR FUTURES & DCA
+        // 3. KALKULATOR & JURNAL
         function formatMoney(num) { return "$" + parseFloat(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
-        
         let activeTracker = { isActive: false, asset: 'BTC', liqPrice: 0 };
 
         function calcFutures() {
@@ -508,7 +491,6 @@
             document.getElementById('res_compound').style.display = "block";
         }
 
-        // --- SISTEM JURNAL BARU (GRAFIK + TIMEFRAME) ---
         let oldJData = JSON.parse(localStorage.getItem('trade_journal')) || [];
         let journalData = JSON.parse(localStorage.getItem('trade_journal_v2'));
         if (!journalData) {
@@ -535,28 +517,11 @@
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Akumulasi PnL ($)',
-                        data: dataArr,
-                        borderColor: lineColor,
-                        backgroundColor: lineColor + '33', 
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3
-                    }]
+                    datasets: [{ label: 'Akumulasi PnL ($)', data: dataArr, borderColor: lineColor, backgroundColor: lineColor + '33', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false }, 
-                        y: { 
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#aaa', font: {size: 10} }
-                        }
-                    }
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#aaa', font: {size: 10} } } }
                 }
             });
         }
@@ -569,26 +534,15 @@
             else if(currentFilter === '1W') fData = journalData.filter(j => now - j.time <= 604800000);
             else if(currentFilter === '1M') fData = journalData.filter(j => now - j.time <= 2592000000);
 
-            let totalPnl = 0, winCount = 0;
-            let cLabels = [], cData = [], cumulative = 0;
-            let h = '';
+            let totalPnl = 0, winCount = 0; let cLabels = [], cData = [], cumulative = 0; let h = '';
 
             fData.forEach((j) => {
-                totalPnl += j.pnl;
-                if(j.pnl > 0) winCount++;
-                cumulative += j.pnl;
-                
-                let d = new Date(j.time);
-                cLabels.push(`${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()<10?'0':''}${d.getMinutes()}`);
-                cData.push(cumulative);
+                totalPnl += j.pnl; if(j.pnl > 0) winCount++; cumulative += j.pnl;
+                let d = new Date(j.time); cLabels.push(`${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()<10?'0':''}${d.getMinutes()}`); cData.push(cumulative);
             });
 
             fData.slice().reverse().forEach((j) => {
-                let actualIdx = journalData.indexOf(j); 
-                let color = j.pnl >= 0 ? '#00ff88' : '#ff4d4d';
-                let d = new Date(j.time);
-                let dateStr = `${d.getDate()}/${d.getMonth()+1}`;
-                
+                let actualIdx = journalData.indexOf(j); let color = j.pnl >= 0 ? '#00ff88' : '#ff4d4d'; let d = new Date(j.time); let dateStr = `${d.getDate()}/${d.getMonth()+1}`;
                 h += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding:8px 0; font-size:0.9em;">
                     <span style="color:#aaa;">${j.pair} <span style="font-size:0.75em; background:#333; padding:2px 5px; border-radius:4px; color:white;">${j.dir}</span> <span style="font-size:0.7em; color:#777; margin-left:5px;">${dateStr}</span></span>
                     <span style="color:${color}; font-weight:bold; text-align:right;">${j.pnl >= 0 ? '+'+j.pnl : j.pnl} USD</span>
@@ -597,59 +551,39 @@
             });
 
             document.getElementById('journal-list').innerHTML = h || '<p style="color:#777; text-align:center;">Belum ada histori pada rentang waktu ini.</p>';
-            
-            let winRate = fData.length > 0 ? ((winCount / fData.length) * 100).toFixed(1) : "0.0";
-            let sumColor = totalPnl >= 0 ? '#00ff88' : '#ff4d4d';
-            let sumSign = totalPnl >= 0 ? '+' : '';
-            
+            let winRate = fData.length > 0 ? ((winCount / fData.length) * 100).toFixed(1) : "0.0"; let sumColor = totalPnl >= 0 ? '#00ff88' : '#ff4d4d'; let sumSign = totalPnl >= 0 ? '+' : '';
             document.getElementById('j_total_pnl').innerHTML = `<span style="color:${sumColor}">${sumSign}${formatMoney(totalPnl)}</span> <br><span style="font-size: 0.45em; color:#aaa; display:block; margin-top:5px;">WIN RATE: <span style="color:#f3ba2f">${winRate}%</span> | TOTAL TRADE: ${fData.length}</span>`;
-            
             updateChart(cLabels, cData, sumColor);
         }
 
         function addJournal() {
             let pair = document.getElementById('j_pair').value.toUpperCase(); let dir = document.getElementById('j_dir').value; let pnl = parseFloat(document.getElementById('j_pnl').value);
             if(!pair || isNaN(pnl)) return alert("Isi form Koin dan PnL dengan benar!");
-            journalData.push({pair, dir, pnl, time: Date.now()}); 
-            localStorage.setItem('trade_journal_v2', JSON.stringify(journalData));
-            document.getElementById('j_pair').value = ''; document.getElementById('j_pnl').value = '';
-            renderJournal();
+            journalData.push({pair, dir, pnl, time: Date.now()}); localStorage.setItem('trade_journal_v2', JSON.stringify(journalData));
+            document.getElementById('j_pair').value = ''; document.getElementById('j_pnl').value = ''; renderJournal();
         }
-        function delJournal(i) { 
-            journalData.splice(i, 1); 
-            localStorage.setItem('trade_journal_v2', JSON.stringify(journalData)); 
-            renderJournal(); 
-        }
-        
+        function delJournal(i) { journalData.splice(i, 1); localStorage.setItem('trade_journal_v2', JSON.stringify(journalData)); renderJournal(); }
         renderJournal(); 
-
-        const notesArea = document.getElementById('trade-notes');
-        notesArea.value = localStorage.getItem('trade_notes') || '';
-        notesArea.addEventListener('input', () => { localStorage.setItem('trade_notes', notesArea.value); });
+        
+        const notesArea = document.getElementById('trade-notes'); notesArea.value = localStorage.getItem('trade_notes') || ''; notesArea.addEventListener('input', () => { localStorage.setItem('trade_notes', notesArea.value); });
 
         // 4. PELACAK BLOCKCHAIN OTOMATIS & WATCH WALLET MODE
-        const DEFAULT_WALLET_EVM = "0xB4D3b97B8dbde09400541624A5206508226B5B74";
-        const DEFAULT_WALLET_SOL = "CkevwZGxSUCKAbM1dnVEMquFcFhSfuk3HwUMmQfZjVJj";
+        const DEFAULT_WALLET_EVM = "0xB4D3b97B8dbde09400541624A5206508226B5B74"; // Ini Dompet Anda (5B74)
         const erc20ABI = ["function balanceOf(address owner) view returns (uint256)"];
-        let assetBalances = { bnb:0, bsc_usdt:0, bsc_btcb:0, bsc_xaut:0, eth:0, eth_usdt:0, sol:0, sol_usdt:0, matic:0, pol_usdt:0, arb_eth:0, arb_usdt:0 };
-        let livePrices = { BNB:0, BTC:0, ETH:0, SOL:0, MATIC:0, XAUT:0 };
-        let grandTotalUSD = 0;
+        let assetBalances = { bsc_usdt:0, matic:0, arb_eth:0 };
+        let livePrices = { BTC:0, ETH:0, MATIC:0 };
+        let grandTotalUSD = 0; // Hanya untuk aset On-Chain
 
+        // FUNGSI UPDATE TOTAL DENGAN TAMBAHAN FUTURES MANUAL
         function updateIdrTotal() {
             const customRate = parseFloat(document.getElementById('custom-idr-rate').value) || 15500;
-            document.getElementById('total-idr').innerText = "Rp " + (grandTotalUSD * customRate).toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        }
-
-        async function fetchGas() {
-            try {
-                const ethP = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/eth');
-                const bscP = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
-                const polP = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/');
-                const [gE, gB, gP] = await Promise.all([ ethP.getGasPrice(), bscP.getGasPrice(), polP.getGasPrice() ]);
-                document.getElementById('gas-eth').innerText = parseFloat(ethers.utils.formatUnits(gE, "gwei")).toFixed(1);
-                document.getElementById('gas-bsc').innerText = parseFloat(ethers.utils.formatUnits(gB, "gwei")).toFixed(1);
-                document.getElementById('gas-pol').innerText = parseFloat(ethers.utils.formatUnits(gP, "gwei")).toFixed(1);
-            } catch(e) { console.log("Gagal memuat gas fee."); }
+            const futuresBal = parseFloat(document.getElementById('manual-futures').value) || 0;
+            
+            // Total = Saldo OnChain + Saldo Futures Inputan
+            const finalTotalUSD = grandTotalUSD + futuresBal;
+            
+            document.getElementById('total-usd').innerText = formatMoney(finalTotalUSD);
+            document.getElementById('total-idr').innerText = "Rp " + (finalTotalUSD * customRate).toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         }
 
         async function fetchLiveMarket() {
@@ -658,21 +592,15 @@
                 const priceData = await res.json();
                 const pMap = {}; priceData.forEach(item => pMap[item.symbol] = parseFloat(item.price));
                 
-                livePrices.BNB = pMap['BNBUSDT'] || 0; livePrices.BTC = pMap['BTCUSDT'] || 0; livePrices.ETH = pMap['ETHUSDT'] || 0; livePrices.SOL = pMap['SOLUSDT'] || 0; livePrices.MATIC = pMap['POLUSDT'] || pMap['MATICUSDT'] || 0; livePrices.XAUT = pMap['PAXGUSDT'] || 2500;
+                livePrices.BTC = pMap['BTCUSDT'] || 0; livePrices.ETH = pMap['ETHUSDT'] || 0; livePrices.MATIC = pMap['POLUSDT'] || pMap['MATICUSDT'] || 0;
                 
                 if(activeTracker.isActive) {
                     const lPrice = livePrices[activeTracker.asset];
                     if(lPrice) {
                         const distPercent = Math.abs(lPrice - activeTracker.liqPrice) / lPrice * 100;
-                        const statDiv = document.getElementById('liq_warning');
-                        const statText = document.getElementById('liq_status_text');
-                        if(distPercent <= 5) {
-                            statDiv.classList.add('blink-danger');
-                            statText.innerHTML = `⚠️ BAHAYA! Harga ${activeTracker.asset} (${formatMoney(lPrice)}) mendekati area likuidasi Anda! (${distPercent.toFixed(1)}% lagi)`;
-                        } else {
-                            statDiv.classList.remove('blink-danger');
-                            statText.innerHTML = `✅ Aman. Harga Live ${activeTracker.asset}: ${formatMoney(lPrice)} <br><span style="font-size:0.8em; color:#777;">Jarak ke Liq: ${distPercent.toFixed(1)}%</span>`;
-                        }
+                        const statDiv = document.getElementById('liq_warning'); const statText = document.getElementById('liq_status_text');
+                        if(distPercent <= 5) { statDiv.classList.add('blink-danger'); statText.innerHTML = `⚠️ BAHAYA! Harga ${activeTracker.asset} (${formatMoney(lPrice)}) mendekati area likuidasi Anda! (${distPercent.toFixed(1)}% lagi)`; } 
+                        else { statDiv.classList.remove('blink-danger'); statText.innerHTML = `✅ Aman. Harga Live ${activeTracker.asset}: ${formatMoney(lPrice)} <br><span style="font-size:0.8em; color:#777;">Jarak ke Liq: ${distPercent.toFixed(1)}%</span>`; }
                     }
                 }
             } catch(e) {}
@@ -680,83 +608,58 @@
 
         async function loadAllBalances() {
             document.getElementById('total-usd').innerText = "Menghitung...";
-            fetchGas(); 
             
             let searchInput = document.getElementById('search-wallet') ? document.getElementById('search-wallet').value.trim() : "";
             let targetEVM = DEFAULT_WALLET_EVM;
-            let targetSOL = DEFAULT_WALLET_SOL;
-            let statusMsg = document.getElementById('wallet-status-msg');
             
-            if (searchInput !== "") {
-                if (searchInput.startsWith("0x")) { 
-                    targetEVM = searchInput; 
-                    statusMsg.innerHTML = "👀 Memantau aset EVM dompet eksternal. (Solana tetap default).";
-                    statusMsg.style.color = "#f3ba2f";
-                } else { 
-                    targetSOL = searchInput; 
-                    statusMsg.innerHTML = "👀 Memantau aset SOL dompet eksternal. (EVM tetap default).";
-                    statusMsg.style.color = "#14f195";
-                }
-            } else {
-                statusMsg.innerHTML = "*Kosongkan kolom lalu klik Cari untuk kembali ke dompet utama.";
-                statusMsg.style.color = "#777";
-            }
+            if (searchInput !== "" && searchInput.startsWith("0x")) { targetEVM = searchInput; }
             
             try {
                 await fetchLiveMarket(); 
                 if(!document.getElementById('custom-idr-rate').value) document.getElementById('custom-idr-rate').value = 15500;
 
-                try {
-                    const bscProvider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
-                    assetBalances.bnb = parseFloat(ethers.utils.formatEther(await bscProvider.getBalance(targetEVM)));
-                    const bscUsdt = new ethers.Contract("0x55d398326f99059fF775485246999027B3197955", erc20ABI, bscProvider);
-                    assetBalances.bsc_usdt = parseFloat(ethers.utils.formatUnits(await bscUsdt.balanceOf(targetEVM), 18));
-                    const bscBtcb = new ethers.Contract("0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", erc20ABI, bscProvider);
-                    assetBalances.bsc_btcb = parseFloat(ethers.utils.formatUnits(await bscBtcb.balanceOf(targetEVM), 18));
-                    const bscXaut = new ethers.Contract("0x21cAef8A43163Eea865baeE23b9C2E327696A3bf", erc20ABI, bscProvider);
-                    assetBalances.bsc_xaut = parseFloat(ethers.utils.formatUnits(await bscXaut.balanceOf(targetEVM), 6));
-                    document.getElementById('bnb-bnb').innerText = assetBalances.bnb.toFixed(4) + " BNB"; document.getElementById('bnb-usdt').innerText = assetBalances.bsc_usdt.toFixed(2) + " USDT"; document.getElementById('bnb-btcb').innerText = assetBalances.bsc_btcb.toFixed(6) + " BTCB"; document.getElementById('bnb-xaut').innerText = assetBalances.bsc_xaut.toFixed(4) + " XAUt";
-                } catch(e) { console.error("BSC Error", e); }
-
-                try {
-                    const ethProvider = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/eth');
-                    assetBalances.eth = parseFloat(ethers.utils.formatEther(await ethProvider.getBalance(targetEVM)));
-                    const ethUsdt = new ethers.Contract("0xdAC17F958D2ee523a2206206994597C13D831ec7", erc20ABI, ethProvider);
-                    assetBalances.eth_usdt = parseFloat(ethers.utils.formatUnits(await ethUsdt.balanceOf(targetEVM), 6));
-                    document.getElementById('eth-eth').innerText = assetBalances.eth.toFixed(4) + " ETH"; document.getElementById('eth-usdt').innerText = assetBalances.eth_usdt.toFixed(2) + " USDT";
-                } catch(e) { console.error("ETH Error", e); }
-
+                // 1. Ambil Polygon (POL)
                 try {
                     const polProvider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/');
                     assetBalances.matic = parseFloat(ethers.utils.formatEther(await polProvider.getBalance(targetEVM)));
-                    const polUsdt = new ethers.Contract("0xc2132D05D31c914a87C6611C10748AEb04B58e8F", erc20ABI, polProvider);
-                    assetBalances.pol_usdt = parseFloat(ethers.utils.formatUnits(await polUsdt.balanceOf(targetEVM), 6));
-                    document.getElementById('pol-matic').innerText = assetBalances.matic.toFixed(2) + " POL"; document.getElementById('pol-usdt').innerText = assetBalances.pol_usdt.toFixed(2) + " USDT";
+                    if(document.getElementById('pol-matic')) document.getElementById('pol-matic').innerText = assetBalances.matic.toFixed(4) + " POL";
                 } catch(e) { console.error("Polygon Error", e); }
 
+                // 2. Ambil BSC (USDT)
+                try {
+                    const bscProvider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
+                    const bscUsdt = new ethers.Contract("0x55d398326f99059fF775485246999027B3197955", erc20ABI, bscProvider);
+                    assetBalances.bsc_usdt = parseFloat(ethers.utils.formatUnits(await bscUsdt.balanceOf(targetEVM), 18));
+                    if(document.getElementById('bnb-usdt')) document.getElementById('bnb-usdt').innerText = assetBalances.bsc_usdt.toFixed(4) + " USDT";
+                } catch(e) { console.error("BSC Error", e); }
+
+                // 3. Ambil Arbitrum (ETH)
                 try {
                     const arbProvider = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc');
                     assetBalances.arb_eth = parseFloat(ethers.utils.formatEther(await arbProvider.getBalance(targetEVM)));
-                    const arbUsdt = new ethers.Contract("0xFd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9", erc20ABI, arbProvider);
-                    assetBalances.arb_usdt = parseFloat(ethers.utils.formatUnits(await arbUsdt.balanceOf(targetEVM), 6));
-                    document.getElementById('arb-eth').innerText = assetBalances.arb_eth.toFixed(4) + " ETH"; document.getElementById('arb-usdt').innerText = assetBalances.arb_usdt.toFixed(2) + " USDT";
+                    if(document.getElementById('arb-eth')) document.getElementById('arb-eth').innerText = assetBalances.arb_eth.toFixed(6) + " ETH";
                 } catch(e) { console.error("Arbitrum Error", e); }
 
+                // Hanya menjumlahkan aset On-Chain
+                grandTotalUSD = assetBalances.bsc_usdt + (assetBalances.matic * livePrices.MATIC) + (assetBalances.arb_eth * livePrices.ETH);
+                updateIdrTotal(); // Fungsi ini akan menggabungkannya dengan inputan Futures manual
+
+            } catch (err) { console.error("Gagal memuat API", err); }
+        }
+
+        // FUNGSI CONNECT METAMASK / BITGET WALLET
+        async function connectWeb3Wallet() {
+            const addressText = document.getElementById('wallet-connected-address');
+            if (typeof window.ethereum !== 'undefined') {
                 try {
-                    const solConnection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com');
-                    const solPubKey = new solanaWeb3.PublicKey(targetSOL);
-                    assetBalances.sol = (await solConnection.getBalance(solPubKey)) / 1e9;
-                    const usdtSolMint = new solanaWeb3.PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
-                    const tokenAccounts = await solConnection.getParsedTokenAccountsByOwner(solPubKey, { mint: usdtSolMint });
-                    if(tokenAccounts.value.length > 0) assetBalances.sol_usdt = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
-                    document.getElementById('sol-sol').innerText = assetBalances.sol.toFixed(4) + " SOL"; document.getElementById('sol-usdt').innerText = assetBalances.sol_usdt.toFixed(2) + " USDT";
-                } catch(e) { console.error("Solana Error", e); }
-
-                grandTotalUSD = (assetBalances.bnb * livePrices.BNB) + assetBalances.bsc_usdt + (assetBalances.bsc_btcb * livePrices.BTC) + (assetBalances.bsc_xaut * livePrices.XAUT) + (assetBalances.eth * livePrices.ETH) + assetBalances.eth_usdt + (assetBalances.sol * livePrices.SOL) + assetBalances.sol_usdt + (assetBalances.matic * livePrices.MATIC) + assetBalances.pol_usdt + (assetBalances.arb_eth * livePrices.ETH) + assetBalances.arb_usdt;
-                document.getElementById('total-usd').innerText = formatMoney(grandTotalUSD);
-                updateIdrTotal();
-
-            } catch (err) { console.error("Gagal memuat API Harga", err); }
+                    addressText.innerText = "Menghubungkan ke dompet...";
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const connectedAddress = accounts[0];
+                    addressText.innerHTML = `✅ Terhubung: <b style="color:white;">${connectedAddress}</b>`;
+                    const searchInput = document.getElementById('search-wallet');
+                    if (searchInput) { searchInput.value = connectedAddress; loadAllBalances(); }
+                } catch (error) { console.error("Koneksi ditolak:", error); addressText.innerText = "❌ Koneksi dibatalkan."; }
+            } else { alert("Tidak ada dompet Web3 yang terdeteksi. Buka melalui browser di dalam aplikasi Bitget Wallet atau MetaMask."); }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -768,36 +671,6 @@
             fetch(apiLink).then(r => r.json()).then(data => { if(data.status === 'ok') { let html = '<ul style="list-style:none; padding:0; margin:0;">'; data.items.slice(0, 6).forEach(item => { const dateObj = new Date(item.pubDate); const fDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }); html += `<li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;"><a href="${item.link}" target="_blank" style="color: white; text-decoration: none; font-size: 0.85em; display:block; margin-bottom:4px; line-height:1.4;">${item.title}</a><span style="font-size: 0.7em; color: #888;">📅 ${fDate} WIB</span></li>`; }); html += '</ul>'; document.getElementById('news-local').innerHTML = html; } }).catch(() => {});
         });
     </script>
-      <script>
-        // --- LOGIKA KONEKSI WEB3 WALLET ---
-        async function connectWeb3Wallet() {
-            const addressText = document.getElementById('wallet-connected-address');
-            
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    addressText.innerText = "Menghubungkan ke dompet...";
-                    // Meminta izin koneksi ke dompet (MetaMask, Bitget, dll)
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    const connectedAddress = accounts[0];
-                    
-                    addressText.innerHTML = `✅ Terhubung: <b style="color:white;">${connectedAddress}</b>`;
-                    
-                    // Masukkan otomatis alamat dompet ke kotak input "Watch Mode" & jalankan pelacakan
-                    const searchInput = document.getElementById('search-wallet');
-                    if (searchInput) {
-                        searchInput.value = connectedAddress;
-                        loadAllBalances(); // Langsung muat saldo dompet asli
-                    }
-                } catch (error) {
-                    console.error("Koneksi ditolak:", error);
-                    addressText.innerText = "❌ Koneksi dibatalkan oleh pengguna.";
-                }
-            } else {
-                alert("Tidak ada ekstensi/aplikasi Web3 Wallet yang terdeteksi di browser ini. Jika di HP, buka link ini langsung dari browser di dalam aplikasi Bitget Wallet atau MetaMask.");
-            }
-        }
-    </script>
-
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
