@@ -247,6 +247,15 @@
     <div id="portofolio" class="content-section">
         <h1 style="margin-bottom: 5px; margin-top: 20px;">KESIMPULAN PORTOFOLIO</h1>
         <p style="color: #aaa; margin-bottom: 20px;">Pelacakan otomatis dari jaringan Web3</p>
+              <!-- TOMBOL KONEKSI WEB3 WALLET -->
+        <div class="calc-card" style="padding: 20px; margin-bottom: 20px; min-height: auto; text-align: center; border-color: #04AA6D; background: rgba(4, 170, 109, 0.05);">
+            <h3 style="color: #00ff88; margin-bottom: 10px; border: none;">🔗 Web3 Wallet Connection</h3>
+            <p style="color: #aaa; font-size: 0.85em; margin-bottom: 15px;">Hubungkan dompet Anda untuk menarik saldo otomatis secara instan.</p>
+            <button class="btn-calc" style="background: linear-gradient(135deg, #f3ba2f, #d49f1c); color: #000;" onclick="connectWeb3Wallet()">
+                🦊 Connect MetaMask / Web3 Wallet
+            </button>
+            <p id="wallet-connected-address" style="font-size: 0.8em; color: #00ff88; margin-top: 10px; word-break: break-all;"></p>
+        </div>
         
         <div class="calc-card" style="padding: 15px; margin-bottom: 20px; min-height: auto; border-color: #0088ff;">
             <label style="font-size: 0.85em; color: #aaa; margin-bottom: 8px; display: block;">🔍 Cek Dompet Lain (Watch Mode):</label>
@@ -759,6 +768,36 @@
             fetch(apiLink).then(r => r.json()).then(data => { if(data.status === 'ok') { let html = '<ul style="list-style:none; padding:0; margin:0;">'; data.items.slice(0, 6).forEach(item => { const dateObj = new Date(item.pubDate); const fDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }); html += `<li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;"><a href="${item.link}" target="_blank" style="color: white; text-decoration: none; font-size: 0.85em; display:block; margin-bottom:4px; line-height:1.4;">${item.title}</a><span style="font-size: 0.7em; color: #888;">📅 ${fDate} WIB</span></li>`; }); html += '</ul>'; document.getElementById('news-local').innerHTML = html; } }).catch(() => {});
         });
     </script>
+      <script>
+        // --- LOGIKA KONEKSI WEB3 WALLET ---
+        async function connectWeb3Wallet() {
+            const addressText = document.getElementById('wallet-connected-address');
+            
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    addressText.innerText = "Menghubungkan ke dompet...";
+                    // Meminta izin koneksi ke dompet (MetaMask, Bitget, dll)
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const connectedAddress = accounts[0];
+                    
+                    addressText.innerHTML = `✅ Terhubung: <b style="color:white;">${connectedAddress}</b>`;
+                    
+                    // Masukkan otomatis alamat dompet ke kotak input "Watch Mode" & jalankan pelacakan
+                    const searchInput = document.getElementById('search-wallet');
+                    if (searchInput) {
+                        searchInput.value = connectedAddress;
+                        loadAllBalances(); // Langsung muat saldo dompet asli
+                    }
+                } catch (error) {
+                    console.error("Koneksi ditolak:", error);
+                    addressText.innerText = "❌ Koneksi dibatalkan oleh pengguna.";
+                }
+            } else {
+                alert("Tidak ada ekstensi/aplikasi Web3 Wallet yang terdeteksi di browser ini. Jika di HP, buka link ini langsung dari browser di dalam aplikasi Bitget Wallet atau MetaMask.");
+            }
+        }
+    </script>
+
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
