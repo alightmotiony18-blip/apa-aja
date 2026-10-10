@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Trading & Portofolio</title>
+    
+    <style>
+        @font-face {
+            font-family: 'ZH-CB-Font';
+            src: url('zh-cb.ttf') format('truetype');
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { background-color: #000000; font-family: 'ZH-CB-Font', Arial, sans-serif; padding-bottom: 120px; min-height: 100vh; color: #ffffff; }
+
+        #video-bg { position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -1; object-fit: cover; opacity: 0.5; }
+
+        h1, p { text-align: center; margin-top: 10px; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); }
+        
+        .content-section { display: none; padding: 20px; animation: fadeIn 0.3s ease-in-out; }
+        .content-section.active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- ASSET BUTTONS --- */
+        .asset-buttons { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 15px 0; }
+        .btn-asset { padding: 8px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: transparent; color: #aaa; font-size: 0.85em; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'ZH-CB-Font', Arial, sans-serif; }
+        .btn-asset:hover { border-color: #04AA6D; color: #00ff88; background: rgba(4, 170, 109, 0.1); }
+        .btn-asset.active-asset { background: rgba(4, 170, 109, 0.1); border: 1px solid #04AA6D; color: #00ff88; box-shadow: 0 0 15px rgba(4, 170, 109, 0.6); }
+
+        /* --- TIME FRAME BUTTONS JURNAL --- */
+        .tf-btn { padding: 5px 10px; border: 1px solid #444; border-radius: 6px; background: transparent; color: #aaa; font-size: 0.8em; cursor: pointer; transition: 0.3s; }
+        .tf-btn.active-tf { background: rgba(4, 170, 109, 0.2); border-color: #04AA6D; color: #00ff88; }
+
+        #tradingview-container { max-width: 1000px; margin: 0 auto; background: rgba(30, 32, 40, 0.85); padding: 12px; border-radius: 12px; border: 2px solid #04AA6D; box-shadow: 0 0 20px rgba(4, 170, 109, 0.5); }
+
+        /* --- LAYOUT GRID --- */
+        .calc-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1000px; margin: 0 auto; }
+        @media (min-width: 768px) { .calc-grid { grid-template-columns: repeat(2, 1fr); } .col-span-full { grid-column: 1 / -1; } }
+
+        /* --- KARTU GLASSMORPHISM --- */
+        .calc-card { background: rgba(30, 32, 40, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 25px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+        .calc-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(4, 170, 109, 0.2); border-color: rgba(4, 170, 109, 0.4); }
+        .calc-card h3 { margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 10px; font-size: 1.2em; }
+        
+        /* --- INPUT & BUTTONS --- */
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0;}
+        .input-group label { font-size: 0.85em; margin-bottom: 6px; color: #bbb; text-transform: uppercase; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.4); color: white; font-size: 1em; outline: none; font-family: 'ZH-CB-Font', Arial, sans-serif; transition: 0.3s; }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: #04AA6D; background: rgba(0, 0, 0, 0.7); box-shadow: 0 0 12px rgba(4, 170, 109, 0.4); }
+        .row { display: flex; gap: 12px; }
+        
+        .btn-calc { width: 100%; padding: 12px; border: none; border-radius: 8px; background: linear-gradient(135deg, #04AA6D, #02734a); color: white; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'ZH-CB-Font', Arial, sans-serif; text-transform: uppercase; }
+        .btn-calc:hover { box-shadow: 0 0 20px rgba(4, 170, 109, 0.8); transform: scale(1.02); }
+        .btn-calc:active { transform: scale(0.98); }
+
+        .result-box { margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.6); border-radius: 8px; border-left: 4px solid #04AA6D; font-size: 0.9em; line-height: 1.6; }
+        .text-green { color: #00ff88; font-weight: bold; }
+        .text-red { color: #ff4d4d; font-weight: bold; }
+        .text-yellow { color: #ffcc00; font-weight: bold; }
+
+        /* --- ANIMASI LIKUIDASI --- */
+        .blink-danger { animation: blinker 0.8s linear infinite; color: #ff4d4d !important; font-weight: bold; border-left: 4px solid #ff4d4d !important; }
+        @keyframes blinker { 50% { opacity: 0.3; text-shadow: 0 0 20px #ff4d4d; } }
+
+        /* --- BARIS ASET PORTOFOLIO --- */
+        .asset-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+        .asset-row .label { color: #aaa; font-size: 0.9em; font-weight: bold; }
+        .asset-row .value { color: #fff; font-size: 0.95em; text-align: right; }
+
+        /* --- SCROLLBAR & NAVIGATION --- */
+        .scroll-area::-webkit-scrollbar { width: 6px; }
+        .scroll-area::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 5px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: #04AA6D; border-radius: 5px; }
+        
+        .navigation { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 400px; max-width: 95%; height: 70px; background: rgba(34, 35, 39, 0.9); display: flex; justify-content: center; align-items: center; border-radius: 10px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        .navigation ul { display: flex; width: 350px; padding: 0; margin: 0; }
+        .navigation ul li { position: relative; list-style: none; width: 70px; height: 70px; z-index: 1; cursor: pointer; }
+        .navigation ul li a { position: relative; display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; text-align: center; font-weight: 500; text-decoration: none; }
+        .navigation ul li a .icon { position: relative; display: block; line-height: 75px; font-size: 1.6em; text-align: center; transition: 0.5s; color: #fff; }
+        .navigation ul li a .text { position: absolute; color: #fff; font-weight: 400; font-size: 0.7em; letter-spacing: 0.05em; transition: 0.5s; opacity: 0; transform: translateY(20px); }
+        .navigation ul li.active a .icon { transform: translateY(-32px); color: #222327; }
+        .navigation ul li.active a .text { opacity: 1; transform: translateY(10px); color: #222327; }
+        .indicator { position: absolute; top: -50%; width: 70px; height: 70px; background: #fff; border-radius: 50%; border: 6px solid transparent; transition: 0.5s; }
+        .navigation ul li:nth-child(1).active ~ .indicator { transform: translateX(calc(70px * 0)); }
+        .navigation ul li:nth-child(2).active ~ .indicator { transform: translateX(calc(70px * 1)); }
+        .navigation ul li:nth-child(3).active ~ .indicator { transform: translateX(calc(70px * 2)); }
+        .navigation ul li:nth-child(4).active ~ .indicator { transform: translateX(calc(70px * 3)); }
+        .navigation ul li:nth-child(5).active ~ .indicator { transform: translateX(calc(70px * 4)); }
+    </style>
+    
+    <!-- PUSTAKA WEB3 & CHART.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <video autoplay muted loop playsinline id="video-bg">
+        <source src="https://raw.githubusercontent.com/alightmotiony18-blip/apa-aja/ad1b62139b604713536c8641cff59306dd1294bf/mybini.mp4" type="video/mp4">
+    </video>
+    
+    <!-- PEMUTAR AUDIO TERSEMBUNYI & TOMBOL CUSTOM HU TAO -->
+    <audio id="bg-music" loop>
+        <source src="https://raw.githubusercontent.com/alightmotiony18-blip/apa-aja/7bae28d1f505c85c80ecfa7d3b016234ae74e681/catcafesong.mp3" type="audio/mpeg">
+    </audio>
+    <button id="music-toggle" onclick="toggleMusic()" style="position: fixed; top: 70px; right: 15px; z-index: 9999; background: rgba(0,0,0,0.6); border: 2px solid #aaa; padding: 2px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; width: 50px; height: 50px; overflow: hidden; transition: 0.3s;">
+        <img id="music-icon" src="https://raw.githubusercontent.com/alightmotiony18-blip/apa-aja/8232242083778d21b29bea3e1ee4e3ff12e394a4/Adobe%20Express%20-%20hutao.gif" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; opacity: 0.4; transition: 0.3s;">
+    </button>
+
+    <!-- TRADINGVIEW TICKER TAPE (PITA HARGA GLOBAL) -->
+    <div class="tradingview-widget-container" style="width: 100%; z-index: 10;">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+        "symbols": [
+          { "description": "Bitcoin", "proName": "BINANCE:BTCUSDT" },
+          { "description": "Ethereum", "proName": "BINANCE:ETHUSDT" },
+          { "description": "Solana", "proName": "BINANCE:SOLUSDT" },
+          { "description": "BNB", "proName": "BINANCE:BNBUSDT" },
+          { "description": "S&P 500", "proName": "OANDA:SPX500USD" },
+          { "description": "Gold", "proName": "OANDA:XAUUSD" },
+          { "description": "USD/IDR", "proName": "FX_IDC:USDIDR" }
+        ],
+        "showSymbolLogo": true,
+        "isTransparent": false,
+        "displayMode": "adaptive",
+        "colorTheme": "dark",
+        "locale": "id"
+        }
+        </script>
+    </div>
+
+    <!-- SECTION MARKET -->
+    <div id="market" class="content-section active-section">
+        <h1 style="margin-top: 20px;">DAFTAR PANTAUAN</h1>
+        <p id="market-subtitle">Pantauan Market: Bitcoin (BTCUSDT)</p>
+        
+        <div class="asset-buttons">
+            <button class="btn-asset active-asset" onclick="changeAsset('BINANCE:BTCUSDT', 'Bitcoin (BTCUSDT)', this)">BTC</button>
+            <button class="btn-asset" onclick="changeAsset('BINANCE:ETHUSDT', 'Ethereum (ETHUSDT)', this)">ETH</button>
+            <button class="btn-asset" onclick="changeAsset('OANDA:XAUUSD', 'Gold / Emas (XAUUSD)', this)">GOLD</button>
+            <button class="btn-asset" onclick="changeAsset('OANDA:SPX500USD', 'S&P 500 Index', this)">S&P 500</button>
+            <button class="btn-asset" onclick="changeAsset('FX_IDC:USDIDR', 'Kurs USD/IDR', this)">USD/IDR</button>
+            <button class="btn-asset" onclick="changeAsset('IDX:COMPOSITE', 'IHSG Indonesia', this)">IHSG</button>
+        </div>
+
+        <div id="tradingview-container" style="margin-bottom: 20px;">
+            <p style="font-size: 0.8em; color: #aaa; text-align: left; margin-bottom: 10px;">1️⃣ Chart Utama (💡 Klik nama koin di pojok kiri atas untuk mencari aset lain)</p>
+            <div id="tradingview_widget"></div>
+        </div>
+
+        <div id="tradingview-container-2" style="max-width: 1000px; margin: 0 auto; background: rgba(30, 32, 40, 0.85); padding: 12px; border-radius: 12px; border: 2px solid #8247e5; box-shadow: 0 0 20px rgba(130, 71, 229, 0.5);">
+            <p style="font-size: 0.8em; color: #aaa; text-align: left; margin-bottom: 10px;">2️⃣ Chart Altcoin (💡 Klik nama koin SUI di pojok kiri atas untuk mengubah ke koin apa pun)</p>
+            <div id="tradingview_widget_2"></div>
+        </div>
+    </div>
+
+    <!-- SECTION KALKULATOR & JURNAL -->
+    <div id="math" class="content-section">
+        <h1 style="margin-bottom: 20px; margin-top: 20px;">KALKULATOR & JURNAL</h1>
+        <div class="calc-grid">
+            
+            <div class="calc-card" style="min-height: auto;">
+                <h3>📈 Futures Calculator</h3>
+                <div class="row">
+                    <div class="input-group"><label>Arah Posisi</label><select id="f_pos"><option value="long">Long (Beli)</option><option value="short">Short (Jual)</option></select></div>
+                    <div class="input-group"><label>Leverage (x)</label><input type="number" id="f_lev" placeholder="Contoh: 10"></div>
+                </div>
+                <div class="row">
+                    <div class="input-group"><label>Margin (USDT)</label><input type="number" id="f_margin" placeholder="Contoh: 50"></div>
+                    <div class="input-group"><label>Entry Price ($)</label><input type="number" id="f_entry" placeholder="Contoh: 65000"></div>
+                </div>
+                <div class="row">
+                    <div class="input-group"><label>Take Profit ($)</label><input type="number" id="f_tp" placeholder="Harga TP"></div>
+                    <div class="input-group"><label>Stop Loss ($)</label><input type="number" id="f_sl" placeholder="Harga SL"></div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <label>Alarm Likuidasi (Opsional)</label>
+                        <select id="f_asset">
+                            <option value="OFF">-- Mati (Tidak Dipantau) --</option>
+                            <option value="BTC">Pantau Bitcoin (BTC)</option>
+                            <option value="ETH">Pantau Ethereum (ETH)</option>
+                            <option value="SOL">Pantau Solana (SOL)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-calc" onclick="calcFutures()">Hitung Profit & Margin</button>
+                <div id="res_futures" class="result-box" style="display:none;"></div>
+                
+                <div id="liq_warning" class="result-box" style="display:none; background: rgba(0,0,0,0.8); margin-top:10px;">
+                    <p style="font-size: 0.8em; color:#aaa; margin:0;">Status Market Riil:</p>
+                    <p id="liq_status_text" style="font-size: 0.9em; margin-top:5px;">Aman.</p>
+                </div>
+            </div>
+
+            <div class="calc-card" style="min-height: auto;">
+                <h3>💰 Compound Interest (DCA)</h3>
+                <div class="row">
+                    <div class="input-group"><label>Modal ($)</label><input type="number" id="c_awal" value="0"></div>
+                    <div class="input-group"><label>DCA/Bulan ($)</label><input type="number" id="c_dca" placeholder="100"></div>
+                </div>
+                <div class="row">
+                    <div class="input-group"><label>Bunga (%)</label><input type="number" id="c_bunga" placeholder="15"></div>
+                    <div class="input-group"><label>Tahun</label><input type="number" id="c_tahun" placeholder="5"></div>
+                </div>
+                <button class="btn-calc" onclick="calcCompound()">Hitung Portofolio</button>
+                <div id="res_compound" class="result-box" style="display:none; border-left-color:#0088ff;"></div>
+            </div>
+
+            <!-- JURNAL DENGAN CHART & TIMEFRAME -->
+            <div class="calc-card col-span-full" style="min-height: auto;">
+                <h3 style="color:#04AA6D;">📖 Jurnal Trading (Catatan Historis)</h3>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <p style="font-size: 0.8em; color: #aaa; margin: 0 0 5px 0;">Total Kenaikan/Penurunan:</p>
+                        <h2 id="j_total_pnl" style="margin: 0; font-size: 1.8em; text-shadow: 0 0 10px rgba(0,0,0,0.5);">$0.00</h2>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="tf-btn active-tf" onclick="filterJournal('ALL', this)">Semua</button>
+                        <button class="tf-btn" onclick="filterJournal('1M', this)">1B</button>
+                        <button class="tf-btn" onclick="filterJournal('1W', this)">1M</button>
+                        <button class="tf-btn" onclick="filterJournal('1D', this)">1H</button>
+                    </div>
+                </div>
+
+                <div style="width: 100%; height: 220px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                    <canvas id="journalChart"></canvas>
+                </div>
+
+                <div class="row" style="margin-bottom:15px;">
+                    <div class="input-group"><input type="text" id="j_pair" placeholder="Koin (Misal: BTC)"></div>
+                    <div class="input-group"><select id="j_dir"><option value="Long">Long</option><option value="Short">Short</option></select></div>
+                    <div class="input-group"><input type="number" id="j_pnl" placeholder="PnL ($)"></div>
+                    <button class="btn-calc" style="width: auto; padding: 0 20px;" onclick="addJournal()">Simpan</button>
+                </div>
+                
+                <div id="journal-list" class="scroll-area" style="max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.4); padding:10px; border-radius:8px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION PORTOFOLIO -->
+    <div id="portofolio" class="content-section">
+        <h1 style="margin-bottom: 5px; margin-top: 20px;">KESIMPULAN PORTOFOLIO</h1>
+        <p style="color: #aaa; margin-bottom: 20px;">Pelacakan otomatis dari jaringan Web3</p>
+        
+        <div class="calc-card" style="padding: 15px; margin-bottom: 20px; min-height: auto; border-color: #0088ff;">
+            <label style="font-size: 0.85em; color: #aaa; margin-bottom: 8px; display: block;">🔍 Cek Dompet Lain (Watch Mode):</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="search-wallet" placeholder="Masukkan Address EVM (0x...) atau Solana" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.5); color: white; outline: none; font-size:0.9em;">
+                <button class="btn-calc" style="width: auto; padding: 0 20px; background: linear-gradient(135deg, #0088ff, #0055aa);" onclick="loadAllBalances()">Cari</button>
+            </div>
+            <p id="wallet-status-msg" style="font-size: 0.7em; color: #777; margin-top: 8px;">*Kosongkan kolom lalu klik Cari untuk kembali ke dompet utama.</p>
+        </div>
+
+        <div class="calc-card" style="padding: 15px; margin-bottom: 20px; min-height: auto; flex-direction: row; justify-content: space-between; align-items: center; border-color: #f3ba2f;">
+            <span style="font-size: 0.8em; color: #aaa; text-transform: uppercase;">⛽ Live Gas Fee (Gwei):</span>
+            <div style="font-size: 0.85em; font-weight: bold;">
+                <span style="color:#627eea; margin-left:10px;">ETH: <span id="gas-eth">--</span></span>
+                <span style="color:#f3ba2f; margin-left:10px;">BSC: <span id="gas-bsc">--</span></span>
+                <span style="color:#8247e5; margin-left:10px;">POL: <span id="gas-pol">--</span></span>
+            </div>
+        </div>
+
+        <div class="calc-card" style="min-height: auto; text-align: center; padding: 25px; border-color: #04AA6D;">
+            <h3 style="border: none; color: #bbb; margin-bottom: 5px; font-size: 1em;">Total Keseluruhan Aset</h3>
+            <h2 id="total-usd" style="font-size: 3em; color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.5); margin: 10px 0;">$0.00</h2>
+            <h3 id="total-idr" style="font-size: 1.6em; color: #f3ba2f; margin-bottom: 15px;">Rp 0</h3>
+            
+            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; display: inline-block;">
+                <label style="font-size: 0.85em; color: #aaa; margin-right: 10px;">⚙️ Kurs USD/IDR:</label>
+                <input type="number" id="custom-idr-rate" style="background: transparent; border: 1px solid #555; color: #00ff88; font-weight: bold; padding: 6px 10px; border-radius: 6px; width: 110px; text-align: center;" oninput="updateIdrTotal()">
+            </div>
+            
+            <button class="btn-calc" style="margin-top: 20px; width: auto; padding: 10px 30px;" onclick="loadAllBalances()">🔄 Muat Ulang / Refresh Saldo</button>
+        </div>
+
+        <div class="calc-grid" style="margin-top: 20px;">
+            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #f3ba2f; border-color: rgba(243, 186, 47, 0.3);">🟡 BNB Chain (BSC)</h3>
+                <div class="asset-row"><span class="label">BNB:</span> <span id="bnb-bnb" class="value">Menghitung...</span></div>
+                <div class="asset-row"><span class="label">USDT:</span> <span id="bnb-usdt" class="value">Menghitung...</span></div>
+                <div class="asset-row"><span class="label">BTCB:</span> <span id="bnb-btcb" class="value">Menghitung...</span></div>
+                <div class="asset-row"><span class="label">XAUt:</span> <span id="bnb-xaut" class="value">Menghitung...</span></div>
+            </div>
+            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #627eea; border-color: rgba(98, 126, 234, 0.3);">🟣 Ethereum Chain</h3>
+                <div class="asset-row"><span class="label">ETH:</span> <span id="eth-eth" class="value">Menghitung...</span></div>
+                <div class="asset-row"><span class="label">USDT:</span> <span id="eth-usdt" class="value">Menghitung...</span></div>
+            </div>
+            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #14f195; border-color: rgba(20, 241, 149, 0.3);">🟢 Solana Chain</h3>
+                <div class="asset-row"><span class="label">SOL:</span> <span id="sol-sol" class="value">Menghitung...</span></div>
+                <div class="asset-row"><span class="label">USDT:</span> <span id="sol-usdt" class="value">Menghitung...</span></div>
+            </div>
+            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #8247e5; border-color: rgba(130, 71, 229, 0.3);">🔵 Polygon Chain</h3>
+                <div class="asset-row"><span class="label">POL:</span> <span id="pol-matic" class="value">Menghitung...</span></div>
+                <div class="asset-row"><span class="label">USDT:</span> <span id="pol-usdt" class="value">Menghitung...</span></div>
+            </div>
+            <div class="calc-card" style="min-height: auto; padding: 20px;"><h3 style="color: #28a0f0; border-color: rgba(40, 160, 240, 0.3);">🔷 Arbitrum Chain</h3>
+                <div class="asset-row"><span class="label">ETH:</span> <span id="arb-eth" class="value">Menghitung...</span></div>
+                <div class="asset-row"><span class="label">USDT:</span> <span id="arb-usdt" class="value">Menghitung...</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECTION KALENDER, BERITA, & CATATAN TRADING -->
+    <div id="calendar" class="content-section">
+        <h1 style="margin-bottom: 20px; margin-top: 20px;">PERENCANAAN TRADING</h1>
+        <div class="calc-grid">
+            <div class="calc-card" style="padding: 15px; min-height: 550px;">
+                <h3 style="margin-bottom: 10px;">📅 Kalender Makroekonomi</h3>
+                <div class="tradingview-widget-container" id="tv-calendar-container" style="height: 100%;">
+                    <div class="tradingview-widget-container__widget" style="height: 100%;"></div>
+                </div>
+            </div>
+            
+            <div class="calc-card" style="padding: 15px; min-height: 550px; justify-content: flex-start;">
+                <h3 style="margin-bottom: 10px;">📰 Berita ID & FedWatch</h3>
+                <div class="scroll-area" style="max-height: 200px; overflow-y: auto; padding-right: 10px; margin-bottom:20px;">
+                    <div id="news-local"><p style="color:#aaa; font-size:0.8em; text-align:center;">Memuat berita lokal...</p></div>
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;">
+                    <a href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" target="_blank" style="display: block; text-align: center; background: rgba(4, 170, 109, 0.15); border: 1px solid #04AA6D; color: #00ff88; padding: 8px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 0.85em;">🔍 Buka CME FedWatch Live</a>
+                </div>
+
+                <h3 style="margin-bottom: 10px; color:#f3ba2f;">📝 Catatan Trading Plan</h3>
+                <p style="font-size:0.7em; color:#888; margin-bottom:5px;">Tersimpan otomatis. Tulis skenario makro Anda di sini.</p>
+                <div class="input-group" style="flex:1;">
+                    <textarea id="trade-notes" style="height:100%; min-height: 150px; resize: none;" placeholder="Contoh: Jika NFP di atas ekspektasi, bersiap Long BTC di support..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECTION SETTINGS (SENTIMEN & TAUTAN) -->
+    <div id="settings" class="content-section">
+        <h1 style="margin-bottom: 20px; margin-top: 20px;">SENTIMEN & TAUTAN</h1>
+        <div class="calc-grid">
+            
+            <div class="calc-card" style="min-height: auto; padding: 25px; text-align: center;">
+                <h3 style="margin-bottom: 15px;">🧭 Crypto Fear & Greed Index</h3>
+                <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Latest Crypto Fear & Greed Index" style="width: 100%; max-width: 300px; border-radius: 8px; margin: 0 auto; display: block; border: 1px solid rgba(255,255,255,0.1);">
+                <p style="font-size: 0.8em; color: #888; margin-top: 15px;">(Diperbarui otomatis setiap hari)</p>
+            </div>
+
+            <div class="calc-card" style="padding: 25px; min-height: auto; text-align: center; justify-content: center;">
+                <h3 style="margin-bottom: 15px;">🔥 Liquidation Map & Order Book</h3>
+                <p style="color: #aaa; font-size: 0.85em; margin-bottom: 20px; line-height: 1.5;">Pantau level likuidasi paus kripto dan sentimen ritel komoditas:</p>
+                
+                <a href="https://www.coinglass.com/pro/futures/LiquidationMap" target="_blank" class="btn-calc" style="text-decoration: none; display: block; text-align: center; margin-bottom: 12px; background: linear-gradient(135deg, #f3ba2f, #d49f1c); color: #000;">
+                    🗺️ BTC Liquidation Map (Coinglass)
+                </a>
+                <a href="https://www.myfxbook.com/community/outlook/XAUUSD" target="_blank" class="btn-calc" style="text-decoration: none; display: block; text-align: center; background: linear-gradient(135deg, #ffcc00, #b38f00); color: #000;">
+                    📊 XAU Retail Sentiment (Myfxbook)
+                </a>
+                <p style="font-size: 0.7em; color: #777; margin-top: 15px; text-align: left; line-height: 1.4;">*Catatan: XAU (Emas) tidak memiliki Liquidation Map on-chain seperti Kripto. Sebagai gantinya, gunakan data Order Book untuk melihat penumpukan posisi trader Forex.</p>
+            </div>
+            
+            <!-- TELEGRAM CHANNELS -->
+            <div class="calc-card col-span-full" style="padding: 25px; text-align: center; justify-content: center;">
+                <h3 style="margin-bottom: 15px;">✈️ Telegram Makro & Sentimen</h3>
+                <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">Akses cepat ke channel analisis dan berita global:</p>
+                
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://t.me/AshCryptoTG" target="_blank" class="btn-calc" style="flex: 1; min-width: 150px; text-decoration: none; background: linear-gradient(135deg, #2AABEE, #1a8cc2);">
+                        ✈️ AshCrypto
+                    </a>
+                    <a href="https://t.me/WatcherGuru" target="_blank" class="btn-calc" style="flex: 1; min-width: 150px; text-decoration: none; background: linear-gradient(135deg, #2AABEE, #1a8cc2);">
+                        ✈️ WatcherGuru
+                    </a>
+                    <a href="https://t.me/bricsnews" target="_blank" class="btn-calc" style="flex: 1; min-width: 150px; text-decoration: none; background: linear-gradient(135deg, #2AABEE, #1a8cc2);">
+                        ✈️ BRICS News
+                    </a>
+                </div>
+            </div>
+
+            <div class="calc-card col-span-full" style="padding: 25px; min-height: auto; text-align: center; justify-content: center;">
+                <h3 style="margin-bottom: 15px;">⚡ X (Twitter) - Analis Kripto</h3>
+                <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">Akses cepat profil X (Twitter) para analis andalan Anda:</p>
+                
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://twitter.com/AshCrypto" target="_blank" class="btn-calc" style="flex: 1; min-width: 150px; text-decoration: none; background: linear-gradient(135deg, #1DA1F2, #0d8bd9);">
+                        🐦 @AshCrypto
+                    </a>
+                    <a href="https://twitter.com/cryptorover" target="_blank" class="btn-calc" style="flex: 1; min-width: 150px; text-decoration: none; background: linear-gradient(135deg, #1DA1F2, #0d8bd9);">
+                        🐦 @cryptorover
+                    </a>
+                    <a href="https://twitter.com/Thekokocrypto" target="_blank" class="btn-calc" style="flex: 1; min-width: 150px; text-decoration: none; background: linear-gradient(135deg, #1DA1F2, #0d8bd9);">
+                        🐦 @Thekokocrypto
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- NAVIGASI BAWAH -->
+    <div class="navigation">
+        <ul>
+            <li class="list active" data-target="market"><a href="#"><span class="icon"><ion-icon name="stats-chart-outline"></ion-icon></span><span class="text">Market</span></a></li>
+            <li class="list" data-target="math"><a href="#"><span class="icon"><ion-icon name="calculator-outline"></ion-icon></span><span class="text">Math</span></a></li>
+            <li class="list" data-target="portofolio"><a href="#"><span class="icon"><ion-icon name="document-text-outline"></ion-icon></span><span class="text">Portofolio</span></a></li>
+            <li class="list" data-target="calendar"><a href="#"><span class="icon"><ion-icon name="calendar-outline"></ion-icon></span><span class="text">Calendar</span></a></li>
+            <li class="list" data-target="settings"><a href="#"><span class="icon"><ion-icon name="settings-outline"></ion-icon></span><span class="text">Sentimen</span></a></li>
+            <div class="indicator"></div>
+        </ul>
+    </div>
+
+    <!-- SCRIPT UTAMA -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        // @ts-nocheck
+        
+        // 0. LOGIKA PEMUTAR MUSIK DENGAN GAMBAR CUSTOM HU TAO
+        function toggleMusic() {
+            const audio = document.getElementById('bg-music');
+            const btn = document.getElementById('music-toggle');
+            const icon = document.getElementById('music-icon');
+            
+            if (audio.paused) {
+                audio.play();
+                icon.style.opacity = '1'; 
+                btn.style.borderColor = '#04AA6D'; 
+                btn.style.boxShadow = '0 0 15px rgba(4, 170, 109, 0.8)'; 
+            } else {
+                audio.pause();
+                icon.style.opacity = '0.4'; 
+                btn.style.borderColor = '#aaa'; 
+                btn.style.boxShadow = 'none';
+            }
+        }
+
+        // 1. LOGIKA NAVIGASI
+        const list = document.querySelectorAll('.list'); const sections = document.querySelectorAll('.content-section');
+        function activeLink() {
+            list.forEach((item) => item.classList.remove('active')); this.classList.add('active');
+            const targetId = this.getAttribute('data-target');
+            sections.forEach((sec) => sec.classList.remove('active-section'));
+            document.getElementById(targetId).classList.add('active-section');
+        }
+        list.forEach((item) => item.addEventListener('click', activeLink));
+
+        // 2. CHART TRADINGVIEW (Dengan Fitur Pencarian & 2 Chart)
+        function loadChart(symbol) {
+            document.getElementById("tradingview_widget").innerHTML = ""; 
+            new TradingView.widget({ "width": "100%", "height": 450, "symbol": symbol, "interval": "15", "timezone": "Asia/Jakarta", "theme": "dark", "style": "1", "locale": "id", "enable_publishing": false, "allow_symbol_change": true, "container_id": "tradingview_widget" });
+        }
+        function loadChart2(symbol) {
+            document.getElementById("tradingview_widget_2").innerHTML = ""; 
+            new TradingView.widget({ "width": "100%", "height": 400, "symbol": symbol, "interval": "15", "timezone": "Asia/Jakarta", "theme": "dark", "style": "1", "locale": "id", "enable_publishing": false, "allow_symbol_change": true, "container_id": "tradingview_widget_2" });
+        }
+        function changeAsset(symbol, labelName, btnElement) {
+            document.getElementById("market-subtitle").innerText = "Pantauan Market: " + labelName;
+            document.querySelectorAll('.btn-asset').forEach(btn => btn.classList.remove('active-asset'));
+            btnElement.classList.add('active-asset'); loadChart(symbol);
+        }
+        loadChart('BINANCE:BTCUSDT'); 
+        loadChart2('BINANCE:SUIUSDT'); 
+
+        // 3. KALKULATOR FUTURES & DCA
+        function formatMoney(num) { return "$" + parseFloat(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+        
+        let activeTracker = { isActive: false, asset: 'BTC', liqPrice: 0 };
+
+        function calcFutures() {
+            const pos = document.getElementById('f_pos').value; const lev = parseFloat(document.getElementById('f_lev').value); const margin = parseFloat(document.getElementById('f_margin').value); const entry = parseFloat(document.getElementById('f_entry').value); const tp = parseFloat(document.getElementById('f_tp').value); const sl = parseFloat(document.getElementById('f_sl').value); const asset = document.getElementById('f_asset').value;
+            if(!lev || !margin || !entry) return alert("Isi minimal Leverage, Margin, dan Entry Price!");
+            
+            const qty = (margin * lev) / entry; 
+            let profit = 0, loss = 0, liq = entry + (pos === 'long' ? -(entry/lev) : (entry/lev));
+            
+            if(tp) profit = pos === 'long' ? (tp - entry) * qty : (entry - tp) * qty;
+            if(sl) loss = pos === 'long' ? (entry - sl) * qty : (sl - entry) * qty;
+            
+            let html = `<b>Estimasi Likuidasi:</b> <span class="text-yellow">${formatMoney(liq)}</span><br><br>`;
+            if(tp) html += `<b>Take Profit:</b> <span class="text-green">+${formatMoney(profit)} (${((profit/margin)*100).toFixed(2)}% ROE)</span><br>`;
+            if(sl) html += `<b>Stop Loss:</b> <span class="text-red">-${formatMoney(loss)} (-${((loss/margin)*100).toFixed(2)}% ROE)</span>`;
+            document.getElementById('res_futures').innerHTML = html; document.getElementById('res_futures').style.display = "block";
+
+            if (asset !== "OFF") {
+                activeTracker = { isActive: true, asset: asset, liqPrice: liq };
+                document.getElementById('liq_warning').style.display = "block";
+                document.getElementById('liq_status_text').innerText = `Memantau likuidasi ${asset} di ${formatMoney(liq)}...`;
+                document.getElementById('liq_warning').classList.remove('blink-danger');
+            } else {
+                activeTracker = { isActive: false, asset: 'BTC', liqPrice: 0 };
+                document.getElementById('liq_warning').style.display = "none";
+            }
+        }
+
+        function calcCompound() {
+            const P = parseFloat(document.getElementById('c_awal').value) || 0; const PMT = parseFloat(document.getElementById('c_dca').value); const rateAnn = parseFloat(document.getElementById('c_bunga').value); const years = parseFloat(document.getElementById('c_tahun').value);
+            if(!PMT || !rateAnn || !years) return alert("Isi DCA, Return Bunga, dan Durasi Tahun!");
+            const r = (rateAnn / 100) / 12; const n = years * 12; 
+            let fv = P * Math.pow(1 + r, n) + (r > 0 ? PMT * ((Math.pow(1 + r, n) - 1) / r) : PMT * n);
+            const inv = P + (PMT * n);
+            document.getElementById('res_compound').innerHTML = `Total Modal Disetor: <b>${formatMoney(inv)}</b><br>Estimasi Keuntungan: <span class="text-green">+${formatMoney(fv - inv)}</span><br><br><b>Total Aset (${years} Tahun): <br><span style="font-size:1.3em; color:#0088ff;">${formatMoney(fv)}</span></b>`;
+            document.getElementById('res_compound').style.display = "block";
+        }
+
+        // --- SISTEM JURNAL BARU (GRAFIK + TIMEFRAME) ---
+        let oldJData = JSON.parse(localStorage.getItem('trade_journal')) || [];
+        let journalData = JSON.parse(localStorage.getItem('trade_journal_v2'));
+        if (!journalData) {
+            journalData = oldJData.length > 0 ? oldJData.map(j => ({pair: j.pair, dir: j.dir, pnl: j.pnl, time: Date.now()})) : [];
+            localStorage.setItem('trade_journal_v2', JSON.stringify(journalData));
+        }
+        
+        let currentFilter = 'ALL';
+        let jChartInstance = null;
+
+        function filterJournal(tf, btnElement) {
+            currentFilter = tf;
+            document.querySelectorAll('.tf-btn').forEach(btn => btn.classList.remove('active-tf'));
+            btnElement.classList.add('active-tf');
+            renderJournal();
+        }
+
+        function updateChart(labels, dataArr, lineColor) {
+            const ctx = document.getElementById('journalChart').getContext('2d');
+            if(jChartInstance) jChartInstance.destroy();
+            if(labels.length === 0) { labels = ['Kosong']; dataArr = [0]; }
+
+            jChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Akumulasi PnL ($)',
+                        data: dataArr,
+                        borderColor: lineColor,
+                        backgroundColor: lineColor + '33', 
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false }, 
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#aaa', font: {size: 10} }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderJournal() {
+            const now = Date.now();
+            let fData = journalData;
+            
+            if(currentFilter === '1D') fData = journalData.filter(j => now - j.time <= 86400000);
+            else if(currentFilter === '1W') fData = journalData.filter(j => now - j.time <= 604800000);
+            else if(currentFilter === '1M') fData = journalData.filter(j => now - j.time <= 2592000000);
+
+            let totalPnl = 0, winCount = 0;
+            let cLabels = [], cData = [], cumulative = 0;
+            let h = '';
+
+            fData.forEach((j) => {
+                totalPnl += j.pnl;
+                if(j.pnl > 0) winCount++;
+                cumulative += j.pnl;
+                
+                let d = new Date(j.time);
+                cLabels.push(`${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()<10?'0':''}${d.getMinutes()}`);
+                cData.push(cumulative);
+            });
+
+            fData.slice().reverse().forEach((j) => {
+                let actualIdx = journalData.indexOf(j); 
+                let color = j.pnl >= 0 ? '#00ff88' : '#ff4d4d';
+                let d = new Date(j.time);
+                let dateStr = `${d.getDate()}/${d.getMonth()+1}`;
+                
+                h += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding:8px 0; font-size:0.9em;">
+                    <span style="color:#aaa;">${j.pair} <span style="font-size:0.75em; background:#333; padding:2px 5px; border-radius:4px; color:white;">${j.dir}</span> <span style="font-size:0.7em; color:#777; margin-left:5px;">${dateStr}</span></span>
+                    <span style="color:${color}; font-weight:bold; text-align:right;">${j.pnl >= 0 ? '+'+j.pnl : j.pnl} USD</span>
+                    <button onclick="delJournal(${actualIdx})" style="background:transparent; border:none; color:#888; cursor:pointer; font-size:1.1em; padding-left:10px;">🗑️</button>
+                </div>`;
+            });
+
+            document.getElementById('journal-list').innerHTML = h || '<p style="color:#777; text-align:center;">Belum ada histori pada rentang waktu ini.</p>';
+            
+            let winRate = fData.length > 0 ? ((winCount / fData.length) * 100).toFixed(1) : "0.0";
+            let sumColor = totalPnl >= 0 ? '#00ff88' : '#ff4d4d';
+            let sumSign = totalPnl >= 0 ? '+' : '';
+            
+            document.getElementById('j_total_pnl').innerHTML = `<span style="color:${sumColor}">${sumSign}${formatMoney(totalPnl)}</span> <br><span style="font-size: 0.45em; color:#aaa; display:block; margin-top:5px;">WIN RATE: <span style="color:#f3ba2f">${winRate}%</span> | TOTAL TRADE: ${fData.length}</span>`;
+            
+            updateChart(cLabels, cData, sumColor);
+        }
+
+        function addJournal() {
+            let pair = document.getElementById('j_pair').value.toUpperCase(); let dir = document.getElementById('j_dir').value; let pnl = parseFloat(document.getElementById('j_pnl').value);
+            if(!pair || isNaN(pnl)) return alert("Isi form Koin dan PnL dengan benar!");
+            journalData.push({pair, dir, pnl, time: Date.now()}); 
+            localStorage.setItem('trade_journal_v2', JSON.stringify(journalData));
+            document.getElementById('j_pair').value = ''; document.getElementById('j_pnl').value = '';
+            renderJournal();
+        }
+        function delJournal(i) { 
+            journalData.splice(i, 1); 
+            localStorage.setItem('trade_journal_v2', JSON.stringify(journalData)); 
+            renderJournal(); 
+        }
+        
+        renderJournal(); 
+
+        const notesArea = document.getElementById('trade-notes');
+        notesArea.value = localStorage.getItem('trade_notes') || '';
+        notesArea.addEventListener('input', () => { localStorage.setItem('trade_notes', notesArea.value); });
+
+        // 4. PELACAK BLOCKCHAIN OTOMATIS & WATCH WALLET MODE
+        const DEFAULT_WALLET_EVM = "0xB4D3b97B8dbde09400541624A5206508226B5B74";
+        const DEFAULT_WALLET_SOL = "CkevwZGxSUCKAbM1dnVEMquFcFhSfuk3HwUMmQfZjVJj";
+        const erc20ABI = ["function balanceOf(address owner) view returns (uint256)"];
+        let assetBalances = { bnb:0, bsc_usdt:0, bsc_btcb:0, bsc_xaut:0, eth:0, eth_usdt:0, sol:0, sol_usdt:0, matic:0, pol_usdt:0, arb_eth:0, arb_usdt:0 };
+        let livePrices = { BNB:0, BTC:0, ETH:0, SOL:0, MATIC:0, XAUT:0 };
+        let grandTotalUSD = 0;
+
+        function updateIdrTotal() {
+            const customRate = parseFloat(document.getElementById('custom-idr-rate').value) || 15500;
+            document.getElementById('total-idr').innerText = "Rp " + (grandTotalUSD * customRate).toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        }
+
+        async function fetchGas() {
+            try {
+                const ethP = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/eth');
+                const bscP = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
+                const polP = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/');
+                const [gE, gB, gP] = await Promise.all([ ethP.getGasPrice(), bscP.getGasPrice(), polP.getGasPrice() ]);
+                document.getElementById('gas-eth').innerText = parseFloat(ethers.utils.formatUnits(gE, "gwei")).toFixed(1);
+                document.getElementById('gas-bsc').innerText = parseFloat(ethers.utils.formatUnits(gB, "gwei")).toFixed(1);
+                document.getElementById('gas-pol').innerText = parseFloat(ethers.utils.formatUnits(gP, "gwei")).toFixed(1);
+            } catch(e) { console.log("Gagal memuat gas fee."); }
+        }
+
+        async function fetchLiveMarket() {
+            try {
+                const res = await fetch('https://api.binance.com/api/v3/ticker/price');
+                const priceData = await res.json();
+                const pMap = {}; priceData.forEach(item => pMap[item.symbol] = parseFloat(item.price));
+                
+                livePrices.BNB = pMap['BNBUSDT'] || 0; livePrices.BTC = pMap['BTCUSDT'] || 0; livePrices.ETH = pMap['ETHUSDT'] || 0; livePrices.SOL = pMap['SOLUSDT'] || 0; livePrices.MATIC = pMap['POLUSDT'] || pMap['MATICUSDT'] || 0; livePrices.XAUT = pMap['PAXGUSDT'] || 2500;
+                
+                if(activeTracker.isActive) {
+                    const lPrice = livePrices[activeTracker.asset];
+                    if(lPrice) {
+                        const distPercent = Math.abs(lPrice - activeTracker.liqPrice) / lPrice * 100;
+                        const statDiv = document.getElementById('liq_warning');
+                        const statText = document.getElementById('liq_status_text');
+                        if(distPercent <= 5) {
+                            statDiv.classList.add('blink-danger');
+                            statText.innerHTML = `⚠️ BAHAYA! Harga ${activeTracker.asset} (${formatMoney(lPrice)}) mendekati area likuidasi Anda! (${distPercent.toFixed(1)}% lagi)`;
+                        } else {
+                            statDiv.classList.remove('blink-danger');
+                            statText.innerHTML = `✅ Aman. Harga Live ${activeTracker.asset}: ${formatMoney(lPrice)} <br><span style="font-size:0.8em; color:#777;">Jarak ke Liq: ${distPercent.toFixed(1)}%</span>`;
+                        }
+                    }
+                }
+            } catch(e) {}
+        }
+
+        async function loadAllBalances() {
+            document.getElementById('total-usd').innerText = "Menghitung...";
+            fetchGas(); 
+            
+            let searchInput = document.getElementById('search-wallet') ? document.getElementById('search-wallet').value.trim() : "";
+            let targetEVM = DEFAULT_WALLET_EVM;
+            let targetSOL = DEFAULT_WALLET_SOL;
+            let statusMsg = document.getElementById('wallet-status-msg');
+            
+            if (searchInput !== "") {
+                if (searchInput.startsWith("0x")) { 
+                    targetEVM = searchInput; 
+                    statusMsg.innerHTML = "👀 Memantau aset EVM dompet eksternal. (Solana tetap default).";
+                    statusMsg.style.color = "#f3ba2f";
+                } else { 
+                    targetSOL = searchInput; 
+                    statusMsg.innerHTML = "👀 Memantau aset SOL dompet eksternal. (EVM tetap default).";
+                    statusMsg.style.color = "#14f195";
+                }
+            } else {
+                statusMsg.innerHTML = "*Kosongkan kolom lalu klik Cari untuk kembali ke dompet utama.";
+                statusMsg.style.color = "#777";
+            }
+            
+            try {
+                await fetchLiveMarket(); 
+                if(!document.getElementById('custom-idr-rate').value) document.getElementById('custom-idr-rate').value = 15500;
+
+                try {
+                    const bscProvider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
+                    assetBalances.bnb = parseFloat(ethers.utils.formatEther(await bscProvider.getBalance(targetEVM)));
+                    const bscUsdt = new ethers.Contract("0x55d398326f99059fF775485246999027B3197955", erc20ABI, bscProvider);
+                    assetBalances.bsc_usdt = parseFloat(ethers.utils.formatUnits(await bscUsdt.balanceOf(targetEVM), 18));
+                    const bscBtcb = new ethers.Contract("0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", erc20ABI, bscProvider);
+                    assetBalances.bsc_btcb = parseFloat(ethers.utils.formatUnits(await bscBtcb.balanceOf(targetEVM), 18));
+                    const bscXaut = new ethers.Contract("0x21cAef8A43163Eea865baeE23b9C2E327696A3bf", erc20ABI, bscProvider);
+                    assetBalances.bsc_xaut = parseFloat(ethers.utils.formatUnits(await bscXaut.balanceOf(targetEVM), 6));
+                    document.getElementById('bnb-bnb').innerText = assetBalances.bnb.toFixed(4) + " BNB"; document.getElementById('bnb-usdt').innerText = assetBalances.bsc_usdt.toFixed(2) + " USDT"; document.getElementById('bnb-btcb').innerText = assetBalances.bsc_btcb.toFixed(6) + " BTCB"; document.getElementById('bnb-xaut').innerText = assetBalances.bsc_xaut.toFixed(4) + " XAUt";
+                } catch(e) { console.error("BSC Error", e); }
+
+                try {
+                    const ethProvider = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/eth');
+                    assetBalances.eth = parseFloat(ethers.utils.formatEther(await ethProvider.getBalance(targetEVM)));
+                    const ethUsdt = new ethers.Contract("0xdAC17F958D2ee523a2206206994597C13D831ec7", erc20ABI, ethProvider);
+                    assetBalances.eth_usdt = parseFloat(ethers.utils.formatUnits(await ethUsdt.balanceOf(targetEVM), 6));
+                    document.getElementById('eth-eth').innerText = assetBalances.eth.toFixed(4) + " ETH"; document.getElementById('eth-usdt').innerText = assetBalances.eth_usdt.toFixed(2) + " USDT";
+                } catch(e) { console.error("ETH Error", e); }
+
+                try {
+                    const polProvider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/');
+                    assetBalances.matic = parseFloat(ethers.utils.formatEther(await polProvider.getBalance(targetEVM)));
+                    const polUsdt = new ethers.Contract("0xc2132D05D31c914a87C6611C10748AEb04B58e8F", erc20ABI, polProvider);
+                    assetBalances.pol_usdt = parseFloat(ethers.utils.formatUnits(await polUsdt.balanceOf(targetEVM), 6));
+                    document.getElementById('pol-matic').innerText = assetBalances.matic.toFixed(2) + " POL"; document.getElementById('pol-usdt').innerText = assetBalances.pol_usdt.toFixed(2) + " USDT";
+                } catch(e) { console.error("Polygon Error", e); }
+
+                try {
+                    const arbProvider = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc');
+                    assetBalances.arb_eth = parseFloat(ethers.utils.formatEther(await arbProvider.getBalance(targetEVM)));
+                    const arbUsdt = new ethers.Contract("0xFd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9", erc20ABI, arbProvider);
+                    assetBalances.arb_usdt = parseFloat(ethers.utils.formatUnits(await arbUsdt.balanceOf(targetEVM), 6));
+                    document.getElementById('arb-eth').innerText = assetBalances.arb_eth.toFixed(4) + " ETH"; document.getElementById('arb-usdt').innerText = assetBalances.arb_usdt.toFixed(2) + " USDT";
+                } catch(e) { console.error("Arbitrum Error", e); }
+
+                try {
+                    const solConnection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com');
+                    const solPubKey = new solanaWeb3.PublicKey(targetSOL);
+                    assetBalances.sol = (await solConnection.getBalance(solPubKey)) / 1e9;
+                    const usdtSolMint = new solanaWeb3.PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
+                    const tokenAccounts = await solConnection.getParsedTokenAccountsByOwner(solPubKey, { mint: usdtSolMint });
+                    if(tokenAccounts.value.length > 0) assetBalances.sol_usdt = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+                    document.getElementById('sol-sol').innerText = assetBalances.sol.toFixed(4) + " SOL"; document.getElementById('sol-usdt').innerText = assetBalances.sol_usdt.toFixed(2) + " USDT";
+                } catch(e) { console.error("Solana Error", e); }
+
+                grandTotalUSD = (assetBalances.bnb * livePrices.BNB) + assetBalances.bsc_usdt + (assetBalances.bsc_btcb * livePrices.BTC) + (assetBalances.bsc_xaut * livePrices.XAUT) + (assetBalances.eth * livePrices.ETH) + assetBalances.eth_usdt + (assetBalances.sol * livePrices.SOL) + assetBalances.sol_usdt + (assetBalances.matic * livePrices.MATIC) + assetBalances.pol_usdt + (assetBalances.arb_eth * livePrices.ETH) + assetBalances.arb_usdt;
+                document.getElementById('total-usd').innerText = formatMoney(grandTotalUSD);
+                updateIdrTotal();
+
+            } catch (err) { console.error("Gagal memuat API Harga", err); }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllBalances();
+            setInterval(fetchLiveMarket, 5000); 
+
+            const calScript = document.createElement('script'); calScript.type = 'text/javascript'; calScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js'; calScript.async = true; calScript.innerHTML = JSON.stringify({ "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "480", "locale": "id", "importanceFilter": "-1,0,1", "currencyFilter": "USD,EUR,GBP,JPY,AUD,CAD,CHF,NZD,CNY,IDR" }); document.querySelector('#tv-calendar-container .tradingview-widget-container__widget').appendChild(calScript);
+            const rssUrl = 'https://www.cnbcindonesia.com/market/rss'; const apiLink = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+            fetch(apiLink).then(r => r.json()).then(data => { if(data.status === 'ok') { let html = '<ul style="list-style:none; padding:0; margin:0;">'; data.items.slice(0, 6).forEach(item => { const dateObj = new Date(item.pubDate); const fDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }); html += `<li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;"><a href="${item.link}" target="_blank" style="color: white; text-decoration: none; font-size: 0.85em; display:block; margin-bottom:4px; line-height:1.4;">${item.title}</a><span style="font-size: 0.7em; color: #888;">📅 ${fDate} WIB</span></li>`; }); html += '</ul>'; document.getElementById('news-local').innerHTML = html; } }).catch(() => {});
+        });
+    </script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
